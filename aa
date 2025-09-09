@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  mariadb:
+    image: mariadb:10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: erpnext
+      MYSQL_PASSWORD: erpnext
+      MYSQL_DATABASE: erpnext
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    restart: always
+
+  redis-cache:
+    image: redis:6.2-alpine
+    restart: always
+
+  redis-queue:
+    image: redis:6.2-alpine
+    restart: always
+
+  redis-socketio:
+    image: redis:6.2-alpine
+    restart: always
+
+  erpnext:
+    image: frappe/erpnext
+    ports:
+      - "8080:8080"
+    environment:
+      SITE_NAME: localhost
+      DB_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      ADMIN_PASSWORD: admin
+      INSTALL_APPS: erpnext
+    depends_on:
+      - mariadb
+      - redis-cache
+      - redis-queue
+      - redis-socketio
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites
+    restart: always
+
+volumes:
+  mariadb-data:  
+  sites-vol:
